@@ -29,7 +29,7 @@ serve-container: pack
 
 
 upload:
-	docker push gcr.io/project-tilas/svc-tils:$(TAG)
+	docker push gcr.io/project-tilas/svc-auth:$(TAG)
 
 deploy:
 	envsubst < k8s/deployment.yml | kubectl apply -f -
