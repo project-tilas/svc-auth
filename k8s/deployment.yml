@@ -1,0 +1,38 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: svc-auth
+  labels: 
+    app: svc-auth
+spec:
+  replicas: 1
+  template:
+    metadata: 
+      labels: 
+        app: svc-auth
+    spec:
+      containers:
+      - name: svc-auth
+        image: gcr.io/project-tilas/svc-auth:${TAG}
+        command:
+        ports:
+          - containerPort: 8080
+        volumeMounts:
+          - name: svc-auth-config
+            mountPath: /etc/svc-auth/
+            readOnly: true
+      volumes:
+        - name: svc-auth-config
+          configMap: { name: svc-auth-config } 
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: svc-auth
+spec:
+  selector:
+    app: svc-auth
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080

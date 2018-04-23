@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -11,8 +13,21 @@ type (
 	health struct {
 		ServiceName string `json:"serviceName"`
 		Alive       bool   `json:"alive"`
+		Version     string `json:"version"`
 	}
 )
+
+var version string
+var addr string
+
+func init() {
+	fmt.Println("Running SVC_AUTH version: " + version)
+	addr = os.Getenv("SVC_AUTH_ADDR")
+	if addr == "" {
+		addr = ":8080"
+	}
+
+}
 
 func main() {
 	// Echo instance
@@ -24,10 +39,10 @@ func main() {
 
 	// Route => handler
 	e.GET("/health", func(c echo.Context) error {
-		u := health{Alive: true, ServiceName: "svc-auth"}
+		u := health{Alive: true, ServiceName: "svc-auth", Version: version}
 		return c.JSON(http.StatusOK, u)
 	})
 
 	// Start server
-	e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(addr))
 }
