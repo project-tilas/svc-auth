@@ -19,14 +19,12 @@ type (
 
 var version string
 var addr string
+var dbAddr string
 
 func init() {
 	fmt.Println("Running SVC_AUTH version: " + version)
-	addr = os.Getenv("SVC_AUTH_ADDR")
-	if addr == "" {
-		addr = ":8080"
-	}
-
+	addr = getEnvVar("SVC_AUTH_ADDR", ":8080")
+	dbAddr = getEnvVar("SVC_AUTH_DB_ADDR", ":8080")
 }
 
 func main() {
@@ -45,4 +43,12 @@ func main() {
 
 	// Start server
 	e.Logger.Fatal(e.Start(addr))
+}
+
+func getEnvVar(env string, fallback string) string {
+	e := os.Getenv(env)
+	if e == "" {
+		return fallback
+	}
+	return e
 }

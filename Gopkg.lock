@@ -8,6 +8,18 @@
   version = "v3.2.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/globalsign/mgo"
+  packages = [
+    ".",
+    "bson",
+    "internal/json",
+    "internal/sasl",
+    "internal/scram"
+  ]
+  revision = "efe0945164a7e582241f37ae8983c075f8f2e870"
+
+[[projects]]
   name = "github.com/labstack/echo"
   packages = [
     ".",
@@ -56,7 +68,9 @@
   name = "golang.org/x/crypto"
   packages = [
     "acme",
-    "acme/autocert"
+    "acme/autocert",
+    "bcrypt",
+    "blowfish"
   ]
   revision = "21652f85b0fdddb6c2b6b77a5beca5c5a908174a"
 
@@ -69,6 +83,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e005a22fb1ddfe8dd1a841fa1258537aa320f8768f3c0a9ca91cfc2e609d6be2"
+  inputs-digest = "606552f8fbb954438b0ec7180b94a3742e55c976612d6e08f0d49d3798cc8f86"
   solver-name = "gps-cdcl"
   solver-version = 1
