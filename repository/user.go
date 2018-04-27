@@ -3,10 +3,6 @@ package repository
 import (
 	"time"
 
-	"github.com/labstack/gommon/log"
-
-	"golang.org/x/crypto/bcrypt"
-
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/project-tilas/svc-auth/domain"
@@ -42,20 +38,18 @@ func (repo *mongoUserRepository) collection() (*mgo.Collection, *mgo.Session) {
 }
 
 func (repo *mongoUserRepository) Insert(u domain.User) (domain.User, error) {
-	u.ID = bson.NewObjectId().String()
 
 	coll, s := repo.collection()
 	defer s.Close()
-	err := coll.Insert(bson.M{
-		"_id":       u.ID,
-		"username":  u.Username,
-		"password":  u.Password,
-		"createdAt": time.Now(),
-		"updatedAt": time.Now(),
-	})
+
+	u.ID = bson.NewObjectId().String()
+	u.CreatedAt = time.Now()
+	u.UpdatedAt = time.Now()
+
+	err := coll.Insert(u)
 
 	if err != nil {
-		return u, err
+		return domain.User{}, err
 	}
 	return u, nil
 }
@@ -67,7 +61,7 @@ func (repo *mongoUserRepository) Update(u domain.User) (domain.User, error) {
 		"updatedAt": time.Now(),
 	}
 	if u.Password != "" {
-		changes["password"] = encrypt(u.Password)
+		changes["password"] = u.Password
 	}
 
 	coll, s := repo.collection()
@@ -101,12 +95,4 @@ func (repo *mongoUserRepository) FindByUsername(u string) (domain.User, error) {
 		return domain.User{}, err
 	}
 	return doc, nil
-}
-
-func encrypt(s string) string {
-	b, err := bcrypt.GenerateFromPassword([]byte(s), bcrypt.DefaultCost)
-	if err != nil {
-		log.Error(err)
-	}
-	return string(b)
 }
