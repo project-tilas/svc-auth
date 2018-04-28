@@ -11,7 +11,7 @@ import (
 )
 
 type AuthService interface {
-	RegisterUser(ctx context.Context, u domain.User) (domain.User, error)
+	Register(ctx context.Context, u domain.User) (domain.User, domain.Token, error)
 	Login(ctx context.Context, username, password string) (domain.User, domain.Token, error)
 }
 
@@ -30,13 +30,26 @@ func NewRepositoryAuthService(
 	}
 }
 
-func (s repositoryAuthService) RegisterUser(_ context.Context, u domain.User) (domain.User, error) {
+func (s repositoryAuthService) Register(_ context.Context, u domain.User) (domain.User, domain.Token, error) {
+	valErr := u.Validate()
+	if valErr != nil {
+		return domain.User{}, domain.Token{}, valErr
+	}
 	u.EncryptPassword()
 	user, err := s.userRepo.Insert(u)
 	if err != nil {
-		return domain.User{}, err
+		return domain.User{}, domain.Token{}, err
 	}
-	return user, nil
+
+	token, tokenErr := s.tokenRepo.Insert(domain.Token{
+		UserID:    user.ID,
+		Token:     randToken(),
+		ExpiresAt: time.Now().AddDate(0, 0, 30),
+	})
+	if tokenErr != nil {
+		return domain.User{}, domain.Token{}, tokenErr
+	}
+	return user, token, nil
 }
 
 func (s repositoryAuthService) Login(_ context.Context, username, password string) (domain.User, domain.Token, error) {
@@ -45,6 +58,7 @@ func (s repositoryAuthService) Login(_ context.Context, username, password strin
 	if userErr != nil {
 		return domain.User{}, domain.Token{}, userErr
 	}
+	user.ClearPassword()
 
 	passErr := user.ComparePassword(password)
 	if passErr != nil {

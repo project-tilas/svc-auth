@@ -20,6 +20,12 @@
   revision = "efe0945164a7e582241f37ae8983c075f8f2e870"
 
 [[projects]]
+  name = "github.com/go-kit/kit"
+  packages = ["endpoint"]
+  revision = "ca4112baa34cb55091301bdc13b1420a122b1b9e"
+  version = "v0.7.0"
+
+[[projects]]
   name = "github.com/labstack/echo"
   packages = [
     ".",
@@ -83,6 +89,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "606552f8fbb954438b0ec7180b94a3742e55c976612d6e08f0d49d3798cc8f86"
+  inputs-digest = "fd88fb5fe8c1d74d8dd021476cb75eae9c6e8d518969ba12da4ef727b805e11c"
   solver-name = "gps-cdcl"
   solver-version = 1

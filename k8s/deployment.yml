@@ -5,7 +5,7 @@ metadata:
   labels: 
     app: svc-auth
 spec:
-  replicas: 1
+  replicas: 2
   template:
     metadata: 
       labels: 
@@ -21,6 +21,15 @@ spec:
           - name: svc-auth-config
             mountPath: /etc/svc-auth/
             readOnly: true
+        env:
+        - name: SVC_AUTH_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: SVC_AUTH_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
       volumes:
         - name: svc-auth-config
           configMap: { name: svc-auth-config } 
