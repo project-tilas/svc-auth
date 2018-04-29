@@ -45,6 +45,7 @@ func main() {
 
 	// Route => handler
 	e.GET("/health", func(c echo.Context) error {
+		hits++
 		u := health{
 			Alive:       true,
 			ServiceName: "svc-auth",
