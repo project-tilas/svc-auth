@@ -5,7 +5,7 @@ metadata:
   labels: 
     app: svc-auth
 spec:
-  replicas: 5
+  replicas: 1
   template:
     metadata: 
       labels: 

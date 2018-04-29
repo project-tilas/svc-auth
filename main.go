@@ -16,7 +16,6 @@ type (
 		Version     string `json:"version"`
 		PodName     string `json:"podName"`
 		NodeName    string `json:"nodeName"`
-		Hits        int    `json:"hits,omitempty"`
 	}
 )
 
@@ -25,7 +24,6 @@ var addr string
 var dbAddr string
 var nodeName string
 var podName string
-var hits int
 
 func init() {
 	fmt.Println("Running SVC_AUTH version: " + version)
@@ -45,14 +43,12 @@ func main() {
 
 	// Route => handler
 	e.GET("/health", func(c echo.Context) error {
-		hits++
 		u := health{
 			Alive:       true,
 			ServiceName: "svc-auth",
 			Version:     version,
 			PodName:     podName,
 			NodeName:    nodeName,
-			Hits:        hits,
 		}
 		return c.JSON(http.StatusOK, u)
 	})
