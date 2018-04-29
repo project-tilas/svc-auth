@@ -16,6 +16,7 @@ type (
 		Version     string `json:"version"`
 		PodName     string `json:"podName"`
 		NodeName    string `json:"nodeName"`
+		Hits        int    `json:"hits,omitempty"`
 	}
 )
 
@@ -24,6 +25,7 @@ var addr string
 var dbAddr string
 var nodeName string
 var podName string
+var hits int
 
 func init() {
 	fmt.Println("Running SVC_AUTH version: " + version)
@@ -49,6 +51,7 @@ func main() {
 			Version:     version,
 			PodName:     podName,
 			NodeName:    nodeName,
+			Hits:        hits,
 		}
 		return c.JSON(http.StatusOK, u)
 	})
