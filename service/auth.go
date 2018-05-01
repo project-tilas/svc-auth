@@ -13,6 +13,7 @@ import (
 type AuthService interface {
 	Register(ctx context.Context, u domain.User) (domain.User, domain.Token, error)
 	Login(ctx context.Context, username, password string) (domain.User, domain.Token, error)
+	LoginWithToken(ctx context.Context, userID, token string) (domain.User, domain.Token, error)
 }
 
 type repositoryAuthService struct {
@@ -75,6 +76,32 @@ func (s repositoryAuthService) Login(_ context.Context, username, password strin
 	}
 
 	return user, token, nil
+}
+
+func (s repositoryAuthService) LoginWithToken(_ context.Context, userID, token string) (domain.User, domain.Token, error) {
+
+	_, findErr := s.tokenRepo.FindByUserIDAndToken(userID, token)
+	if findErr != nil {
+		return domain.User{}, domain.Token{}, findErr
+	}
+
+	user, userErr := s.userRepo.FindByID(userID)
+	if userErr != nil {
+		return domain.User{}, domain.Token{}, userErr
+	}
+	user.ClearPassword()
+
+	insert, insertErr := s.tokenRepo.Insert(domain.Token{
+		UserID:    user.ID,
+		Token:     randToken(),
+		ExpiresAt: time.Now().AddDate(0, 0, 30),
+	})
+	if insertErr != nil {
+		return domain.User{}, domain.Token{}, insertErr
+	}
+
+	deleteErr := s.tokenRepo.Remove(token)
+	return user, insert, deleteErr
 }
 
 func randToken() string {

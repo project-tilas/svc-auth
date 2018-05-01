@@ -12,6 +12,7 @@ type UserRepository interface {
 	Insert(u domain.User) (domain.User, error)
 	Update(u domain.User) (domain.User, error)
 	Save(u domain.User) (domain.User, error)
+	FindByID(id string) (domain.User, error)
 	FindByUsername(u string) (domain.User, error)
 }
 
@@ -79,6 +80,22 @@ func (repo *mongoUserRepository) Save(u domain.User) (domain.User, error) {
 		return repo.Insert(u)
 	}
 	return repo.Update(u)
+}
+
+func (repo *mongoUserRepository) FindByID(id string) (domain.User, error) {
+	coll, s := repo.collection()
+	defer s.Close()
+
+	var doc domain.User
+	err := coll.FindId(id).One(&doc)
+
+	if err == mgo.ErrNotFound {
+		return domain.User{}, domain.ErrUserNotFound
+	}
+	if err != nil {
+		return domain.User{}, err
+	}
+	return doc, nil
 }
 
 func (repo *mongoUserRepository) FindByUsername(u string) (domain.User, error) {
