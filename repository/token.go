@@ -15,15 +15,20 @@ type TokenRepository interface {
 }
 
 type mongoTokenRepository struct {
-	client *mongoClient
+	client     *mongoClient
+	collection string
 }
 
-func NewMongoTokenRespository(m *mongoClient) TokenRepository {
+func NewMongoTokenRespository(client *mongoClient, collection string) TokenRepository {
 	repo := &mongoTokenRepository{
-		client: m,
+		client:     client,
+		collection: collection,
 	}
-	coll, s := repo.collection()
+
+	s := client.session.Copy()
 	defer s.Close()
+	coll := s.DB("").C(repo.collection)
+
 	coll.EnsureIndex(mgo.Index{
 		Key:        []string{"userId", "token"},
 		Background: false,
@@ -37,13 +42,11 @@ func NewMongoTokenRespository(m *mongoClient) TokenRepository {
 	return repo
 }
 
-func (repo *mongoTokenRepository) collection() (*mgo.Collection, *mgo.Session) {
-	return repo.client.C("token")
-}
-
 func (repo *mongoTokenRepository) Insert(t domain.Token) (domain.Token, error) {
-	coll, s := repo.collection()
+
+	s := repo.client.session.Copy()
 	defer s.Close()
+	coll := s.DB("").C(repo.collection)
 
 	t.ID = bson.NewObjectId().String()
 	t.CreatedAt = time.Now()
@@ -56,14 +59,19 @@ func (repo *mongoTokenRepository) Insert(t domain.Token) (domain.Token, error) {
 }
 
 func (repo *mongoTokenRepository) Remove(token string) error {
-	coll, s := repo.collection()
+
+	s := repo.client.session.Copy()
 	defer s.Close()
+	coll := s.DB("").C(repo.collection)
+
 	return coll.Remove(bson.M{"token": token})
 }
 
 func (repo *mongoTokenRepository) FindByUserIDAndToken(userID, token string) (domain.Token, error) {
-	coll, s := repo.collection()
+
+	s := repo.client.session.Copy()
 	defer s.Close()
+	coll := s.DB("").C(repo.collection)
 
 	var doc domain.Token
 	err := coll.Find(bson.M{

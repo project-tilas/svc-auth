@@ -17,15 +17,20 @@ type UserRepository interface {
 }
 
 type mongoUserRepository struct {
-	client *mongoClient
+	client     *mongoClient
+	collection string
 }
 
-func NewMongoUserRespository(m *mongoClient) UserRepository {
+func NewMongoUserRespository(client *mongoClient, collection string) UserRepository {
 	repo := &mongoUserRepository{
-		client: m,
+		client:     client,
+		collection: collection,
 	}
-	coll, s := repo.collection()
+
+	s := repo.client.session.Copy()
 	defer s.Close()
+	coll := s.DB("").C(repo.collection)
+
 	coll.EnsureIndex(mgo.Index{
 		Key:        []string{"username"},
 		Unique:     true,
@@ -34,14 +39,11 @@ func NewMongoUserRespository(m *mongoClient) UserRepository {
 	return repo
 }
 
-func (repo *mongoUserRepository) collection() (*mgo.Collection, *mgo.Session) {
-	return repo.client.C("user")
-}
-
 func (repo *mongoUserRepository) Insert(u domain.User) (domain.User, error) {
 
-	coll, s := repo.collection()
+	s := repo.client.session.Copy()
 	defer s.Close()
+	coll := s.DB("").C(repo.collection)
 
 	u.ID = bson.NewObjectId().String()
 	u.CreatedAt = time.Now()
@@ -65,8 +67,10 @@ func (repo *mongoUserRepository) Update(u domain.User) (domain.User, error) {
 		changes["password"] = u.Password
 	}
 
-	coll, s := repo.collection()
+	s := repo.client.session.Copy()
 	defer s.Close()
+	coll := s.DB("").C(repo.collection)
+
 	err := coll.Update(selector, changes)
 
 	if err != nil {
@@ -83,8 +87,10 @@ func (repo *mongoUserRepository) Save(u domain.User) (domain.User, error) {
 }
 
 func (repo *mongoUserRepository) FindByID(id string) (domain.User, error) {
-	coll, s := repo.collection()
+
+	s := repo.client.session.Copy()
 	defer s.Close()
+	coll := s.DB("").C(repo.collection)
 
 	var doc domain.User
 	err := coll.FindId(id).One(&doc)
@@ -99,8 +105,10 @@ func (repo *mongoUserRepository) FindByID(id string) (domain.User, error) {
 }
 
 func (repo *mongoUserRepository) FindByUsername(u string) (domain.User, error) {
-	coll, s := repo.collection()
+
+	s := repo.client.session.Copy()
 	defer s.Close()
+	coll := s.DB("").C(repo.collection)
 
 	var doc domain.User
 	err := coll.Find(bson.M{"username": u}).One(&doc)
