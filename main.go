@@ -48,7 +48,7 @@ func init() {
 
 func main() {
 	fmt.Println("Starting SVC_AUTH")
-
+	fmt.Println(os.Getenv("SVC_AUTH_DB_ADDR"))
 	if dbAddr == "" {
 		fmt.Println("No SVC_AUTH_DB_ADDR provided")
 		return
