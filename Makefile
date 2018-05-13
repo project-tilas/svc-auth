@@ -3,7 +3,7 @@
 TAG?=$(shell git rev-list HEAD --max-count=1 --abbrev-commit)
 
 export TAG
-include .env
+-include .env
 export $(shell sed 's/=.*//' .env)
 
 
