@@ -48,11 +48,13 @@ func init() {
 
 func main() {
 	fmt.Println("Starting SVC_AUTH")
-	fmt.Println(os.Getenv("SVC_AUTH_DB_ADDR"))
+
 	if dbAddr == "" {
 		fmt.Println("No SVC_AUTH_DB_ADDR provided")
 		return
 	}
+
+	fmt.Println("Connecting to DB")
 
 	dialInfo, err := mgo.ParseURL(dbAddr)
 	dialInfo.Timeout = 30 * time.Second
@@ -64,6 +66,7 @@ func main() {
 	dialInfo.DialServer = func(addr *mgo.ServerAddr) (net.Conn, error) {
 		return tls.Dial("tcp", addr.String(), &tls.Config{})
 	}
+
 	mongoClient, err := repository.NewMongoClient(dialInfo)
 	if err != nil {
 		fmt.Println(err)
@@ -111,7 +114,6 @@ func main() {
 	// We'll accept graceful shutdowns when quit via SIGINT (Ctrl+C)
 	// SIGKILL, SIGQUIT or SIGTERM (Ctrl+/) will not be caught.
 	signal.Notify(c, os.Interrupt)
-
 	// Block until we receive our signal.
 	<-c
 
