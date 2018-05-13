@@ -56,15 +56,16 @@ func (s repositoryAuthService) Register(_ context.Context, u domain.User) (*doma
 func (s repositoryAuthService) Login(_ context.Context, username, password string) (*domain.User, *domain.Token, error) {
 
 	user, userErr := s.userRepo.FindByUsername(username)
+	fmt.Println(userErr)
 	if userErr != nil {
 		return nil, nil, userErr
 	}
-	user.ClearPassword()
 
 	passErr := user.ComparePassword(password)
 	if passErr != nil {
 		return nil, nil, domain.ErrInvalidPassword
 	}
+	user.ClearPassword()
 
 	token, tokenErr := s.tokenRepo.Insert(domain.Token{
 		UserID:    user.ID,
