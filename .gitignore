@@ -1,2 +1,3 @@
 vendor
 svc-auth
+.env
