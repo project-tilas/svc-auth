@@ -1,31 +1,23 @@
 package repository
 
 import (
-	"time"
-
 	"github.com/globalsign/mgo"
 )
 
 type MongoClientInfo struct {
-	addr     string
-	username string
-	password string
-	database string
+	Addr     string
+	Username string
+	Password string
+	Database string
 }
 
 type mongoClient struct {
 	session *mgo.Session
-	info    *MongoClientInfo
+	info    *mgo.DialInfo
 }
 
-func NewMongoClient(info *MongoClientInfo) (*mongoClient, error) {
-	s, err := mgo.DialWithInfo(&mgo.DialInfo{
-		Addrs:    []string{info.addr},
-		Username: info.username,
-		Password: info.password,
-		Database: info.database,
-		Timeout:  time.Second * 8,
-	})
+func NewMongoClient(info *mgo.DialInfo) (*mongoClient, error) {
+	s, err := mgo.DialWithInfo(info)
 	if err != nil {
 		return nil, err
 	}

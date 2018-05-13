@@ -11,9 +11,9 @@ import (
 )
 
 type AuthService interface {
-	Register(ctx context.Context, u domain.User) (domain.User, domain.Token, error)
-	Login(ctx context.Context, username, password string) (domain.User, domain.Token, error)
-	LoginWithToken(ctx context.Context, userID, token string) (domain.User, domain.Token, error)
+	Register(ctx context.Context, u domain.User) (*domain.User, *domain.Token, error)
+	Login(ctx context.Context, username, password string) (*domain.User, *domain.Token, error)
+	LoginWithToken(ctx context.Context, userID, token string) (*domain.User, *domain.Token, error)
 }
 
 type repositoryAuthService struct {
@@ -31,15 +31,15 @@ func NewRepositoryAuthService(
 	}
 }
 
-func (s repositoryAuthService) Register(_ context.Context, u domain.User) (domain.User, domain.Token, error) {
+func (s repositoryAuthService) Register(_ context.Context, u domain.User) (*domain.User, *domain.Token, error) {
 	valErr := u.Validate()
 	if valErr != nil {
-		return domain.User{}, domain.Token{}, valErr
+		return nil, nil, valErr
 	}
 	u.EncryptPassword()
 	user, err := s.userRepo.Insert(u)
 	if err != nil {
-		return domain.User{}, domain.Token{}, err
+		return nil, nil, err
 	}
 
 	token, tokenErr := s.tokenRepo.Insert(domain.Token{
@@ -48,22 +48,22 @@ func (s repositoryAuthService) Register(_ context.Context, u domain.User) (domai
 		ExpiresAt: time.Now().AddDate(0, 0, 30),
 	})
 	if tokenErr != nil {
-		return domain.User{}, domain.Token{}, tokenErr
+		return nil, nil, tokenErr
 	}
-	return user, token, nil
+	return &user, &token, nil
 }
 
-func (s repositoryAuthService) Login(_ context.Context, username, password string) (domain.User, domain.Token, error) {
+func (s repositoryAuthService) Login(_ context.Context, username, password string) (*domain.User, *domain.Token, error) {
 
 	user, userErr := s.userRepo.FindByUsername(username)
 	if userErr != nil {
-		return domain.User{}, domain.Token{}, userErr
+		return nil, nil, userErr
 	}
 	user.ClearPassword()
 
 	passErr := user.ComparePassword(password)
 	if passErr != nil {
-		return domain.User{}, domain.Token{}, domain.ErrInvalidPassword
+		return nil, nil, domain.ErrInvalidPassword
 	}
 
 	token, tokenErr := s.tokenRepo.Insert(domain.Token{
@@ -72,22 +72,22 @@ func (s repositoryAuthService) Login(_ context.Context, username, password strin
 		ExpiresAt: time.Now().AddDate(0, 0, 30),
 	})
 	if tokenErr != nil {
-		return domain.User{}, domain.Token{}, tokenErr
+		return nil, nil, tokenErr
 	}
 
-	return user, token, nil
+	return &user, &token, nil
 }
 
-func (s repositoryAuthService) LoginWithToken(_ context.Context, userID, token string) (domain.User, domain.Token, error) {
+func (s repositoryAuthService) LoginWithToken(_ context.Context, userID, token string) (*domain.User, *domain.Token, error) {
 
 	_, findErr := s.tokenRepo.FindByUserIDAndToken(userID, token)
 	if findErr != nil {
-		return domain.User{}, domain.Token{}, findErr
+		return nil, nil, findErr
 	}
 
 	user, userErr := s.userRepo.FindByID(userID)
 	if userErr != nil {
-		return domain.User{}, domain.Token{}, userErr
+		return nil, nil, userErr
 	}
 	user.ClearPassword()
 
@@ -97,11 +97,11 @@ func (s repositoryAuthService) LoginWithToken(_ context.Context, userID, token s
 		ExpiresAt: time.Now().AddDate(0, 0, 30),
 	})
 	if insertErr != nil {
-		return domain.User{}, domain.Token{}, insertErr
+		return nil, nil, insertErr
 	}
 
 	deleteErr := s.tokenRepo.Remove(token)
-	return user, insert, deleteErr
+	return &user, &insert, deleteErr
 }
 
 func randToken() string {

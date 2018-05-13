@@ -21,7 +21,7 @@ type mongoUserRepository struct {
 	collection string
 }
 
-func NewMongoUserRespository(client *mongoClient, collection string) UserRepository {
+func NewMongoUserRespository(client *mongoClient, collection string) (UserRepository, error) {
 	repo := &mongoUserRepository{
 		client:     client,
 		collection: collection,
@@ -31,12 +31,16 @@ func NewMongoUserRespository(client *mongoClient, collection string) UserReposit
 	defer s.Close()
 	coll := s.DB("").C(repo.collection)
 
-	coll.EnsureIndex(mgo.Index{
+	err := coll.EnsureIndex(mgo.Index{
 		Key:        []string{"username"},
 		Unique:     true,
 		Background: false,
 	})
-	return repo
+	if err != nil {
+		return nil, err
+	}
+
+	return repo, nil
 }
 
 func (repo *mongoUserRepository) Insert(u domain.User) (domain.User, error) {

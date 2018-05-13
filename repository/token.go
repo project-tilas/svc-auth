@@ -19,7 +19,7 @@ type mongoTokenRepository struct {
 	collection string
 }
 
-func NewMongoTokenRespository(client *mongoClient, collection string) TokenRepository {
+func NewMongoTokenRespository(client *mongoClient, collection string) (TokenRepository, error) {
 	repo := &mongoTokenRepository{
 		client:     client,
 		collection: collection,
@@ -29,17 +29,25 @@ func NewMongoTokenRespository(client *mongoClient, collection string) TokenRepos
 	defer s.Close()
 	coll := s.DB("").C(repo.collection)
 
-	coll.EnsureIndex(mgo.Index{
+	err := coll.EnsureIndex(mgo.Index{
 		Key:        []string{"userId", "token"},
 		Background: false,
 	})
-	coll.EnsureIndex(mgo.Index{
+	if err != nil {
+		return nil, err
+	}
+
+	err = coll.EnsureIndex(mgo.Index{
 		Key:         []string{"token"},
 		Unique:      true,
 		ExpireAfter: 0,
 		Background:  false,
 	})
-	return repo
+	if err != nil {
+		return nil, err
+	}
+
+	return repo, nil
 }
 
 func (repo *mongoTokenRepository) Insert(t domain.Token) (domain.Token, error) {
