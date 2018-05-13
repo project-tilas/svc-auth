@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -48,7 +47,6 @@ func init() {
 }
 
 func main() {
-	testGetGolang()
 
 	fmt.Println("Starting SVC_AUTH")
 
@@ -174,20 +172,4 @@ func getEnvVar(env string, fallback string) string {
 		return fallback
 	}
 	return e
-}
-
-func testGetGolang() {
-	response, err := http.Get("https://golang.org/")
-	if err != nil {
-		fmt.Printf("%s", err)
-		os.Exit(1)
-	} else {
-		defer response.Body.Close()
-		contents, err := ioutil.ReadAll(response.Body)
-		if err != nil {
-			fmt.Printf("%s", err)
-			os.Exit(1)
-		}
-		fmt.Printf("%s\n", string(contents))
-	}
 }
