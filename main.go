@@ -48,7 +48,12 @@ func init() {
 
 func main() {
 
-	dialInfo, err := mgo.ParseURL("mongodb://svc-auth:eqsAGTfMbv7T34Ui@project-tilas-shard-00-00-39paa.mongodb.net:27017,project-tilas-shard-00-01-39paa.mongodb.net:27017,project-tilas-shard-00-02-39paa.mongodb.net:27017/svc-auth?replicaSet=Project-Tilas-shard-0&authSource=admin")
+	if dbAddr == "" {
+		fmt.Println("No SVC_AUTH_DB_ADDR provided")
+		return
+	}
+
+	dialInfo, err := mgo.ParseURL(dbAddr)
 	if err != nil {
 		fmt.Println(err)
 		return
