@@ -41,7 +41,7 @@ var podName string
 func init() {
 	fmt.Println("Running SVC_AUTH version: " + version)
 	addr = getEnvVar("SVC_AUTH_ADDR", ":8080")
-	dbAddr = getEnvVar("SVC_AUTH_DB_ADDR", ":8080")
+	dbAddr = getEnvVar("SVC_AUTH_DB_ADDR", "")
 	nodeName = getEnvVar("SVC_AUTH_NODE_NAME", "N/A")
 	podName = getEnvVar("SVC_AUTH_POD_NAME", "N/A")
 }
@@ -86,7 +86,7 @@ func main() {
 	handler.MakeServerHandler(authSvc, apiRouter)
 	printRoutes(r)
 	srv := &http.Server{
-		Addr: "0.0.0.0:8080",
+		Addr: addr,
 		// Good practice to set timeouts to avoid Slowloris attacks.
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
