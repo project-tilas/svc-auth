@@ -98,6 +98,7 @@ func main() {
 		IdleTimeout:  time.Second * 60,
 		Handler:      r, // Pass our instance of gorilla/mux in.
 	}
+	fmt.Println("Listening on " + addr)
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
 			log.Println(err)
