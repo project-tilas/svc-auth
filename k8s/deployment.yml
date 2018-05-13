@@ -30,6 +30,11 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
+        - name: SVC_AUTH_DB_ADDR
+          valueFrom:
+            secretKeyRef:
+              name: svc-auth-secrets
+              key: SVC_AUTH_DB_ADDR
       volumes:
         - name: svc-auth-config
           configMap: { name: svc-auth-config } 
