@@ -177,7 +177,7 @@ func getEnvVar(env string, fallback string) string {
 }
 
 func testGetGolang() {
-	response, err := http.Get("https://web-sniffer.net/")
+	response, err := http.Get("https://golang.org/")
 	if err != nil {
 		fmt.Printf("%s", err)
 		os.Exit(1)
