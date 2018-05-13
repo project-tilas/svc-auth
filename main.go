@@ -40,7 +40,7 @@ var podName string
 
 func init() {
 	fmt.Println("Running SVC_AUTH version: " + version)
-	addr = getEnvVar("SVC_AUTH_ADDR", ":8080")
+	addr = getEnvVar("SVC_AUTH_ADDR", "0.0.0.0:8080")
 	dbAddr = getEnvVar("SVC_AUTH_DB_ADDR", "")
 	nodeName = getEnvVar("SVC_AUTH_NODE_NAME", "N/A")
 	podName = getEnvVar("SVC_AUTH_POD_NAME", "N/A")
