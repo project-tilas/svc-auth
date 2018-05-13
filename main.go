@@ -47,7 +47,6 @@ func init() {
 }
 
 func main() {
-
 	fmt.Println("Starting SVC_AUTH")
 
 	if dbAddr == "" {
@@ -56,6 +55,7 @@ func main() {
 	}
 
 	dialInfo, err := mgo.ParseURL(dbAddr)
+	dialInfo.Timeout = 30 * time.Second
 	if err != nil {
 		fmt.Println(err)
 		return
