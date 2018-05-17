@@ -19,19 +19,6 @@ func (u *User) ClearPassword() {
 	u.Password = ""
 }
 
-// Validate tries to validate the struct, if it does not validate correctly it give back an error.
-func (u *User) Validate() error {
-	if u.Password == "" {
-		return ErrPasswordRequired
-	}
-
-	if u.Username == "" {
-		return ErrUsernameRequired
-	}
-
-	return nil
-}
-
 func (u *User) EncryptPassword() error {
 	b, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {

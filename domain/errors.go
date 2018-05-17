@@ -1,23 +1,33 @@
 package domain
 
 import (
-	"errors"
+	"fmt"
 )
 
-// Validation errors
-var (
-	ErrUsernameRequired = errors.New("Username is required")
-	ErrPasswordRequired = errors.New("Password is required")
-	ErrInvalidPassword  = errors.New("Incorrect Password")
-)
+type NotFoundError struct {
+	ID       string
+	Resource string
+}
 
-// User errors
-var (
-	ErrUserNotFound      = errors.New("User not found")
-	ErrUserAlreadyExists = errors.New("User already exists")
-)
+func (e *NotFoundError) Error() string {
+	if e.ID != "" {
+		return fmt.Sprintf("%s %s not found", e.Resource, e.ID)
+	}
+	return fmt.Sprintf("%s not found", e.ID)
+}
 
-// Token errors
-var (
-	ErrTokenNotFound = errors.New("Token not found")
-)
+type AlreadyExistsError struct {
+	Resource string
+}
+
+func (e *AlreadyExistsError) Error() string {
+	return fmt.Sprintf("%s already exists", e.Resource)
+}
+
+type ValidationError struct {
+	Reason string
+}
+
+func (e *ValidationError) Error() string {
+	return e.Reason
+}

@@ -9,9 +9,9 @@ import (
 )
 
 type TokenRepository interface {
-	Insert(token domain.Token) (domain.Token, error)
+	Insert(token domain.Token) (*domain.Token, error)
 	Remove(token string) error
-	FindByUserIDAndToken(userID, token string) (domain.Token, error)
+	FindByUserIDAndToken(userID, token string) (*domain.Token, error)
 }
 
 type mongoTokenRepository struct {
@@ -50,7 +50,7 @@ func NewMongoTokenRespository(client *mongoClient, collection string) (TokenRepo
 	return repo, nil
 }
 
-func (repo *mongoTokenRepository) Insert(t domain.Token) (domain.Token, error) {
+func (repo *mongoTokenRepository) Insert(t domain.Token) (*domain.Token, error) {
 
 	s := repo.client.session.Copy()
 	defer s.Close()
@@ -61,9 +61,9 @@ func (repo *mongoTokenRepository) Insert(t domain.Token) (domain.Token, error) {
 	err := coll.Insert(t)
 
 	if err != nil {
-		return domain.Token{}, err
+		return nil, err
 	}
-	return t, nil
+	return &t, nil
 }
 
 func (repo *mongoTokenRepository) Remove(token string) error {
@@ -75,7 +75,7 @@ func (repo *mongoTokenRepository) Remove(token string) error {
 	return coll.Remove(bson.M{"token": token})
 }
 
-func (repo *mongoTokenRepository) FindByUserIDAndToken(userID, token string) (domain.Token, error) {
+func (repo *mongoTokenRepository) FindByUserIDAndToken(userID, token string) (*domain.Token, error) {
 
 	s := repo.client.session.Copy()
 	defer s.Close()
@@ -88,10 +88,10 @@ func (repo *mongoTokenRepository) FindByUserIDAndToken(userID, token string) (do
 	}).One(&doc)
 
 	if err == mgo.ErrNotFound {
-		return domain.Token{}, domain.ErrTokenNotFound
+		return nil, &domain.NotFoundError{Resource: "Token", ID: token}
 	}
 	if err != nil {
-		return domain.Token{}, err
+		return nil, err
 	}
-	return doc, nil
+	return &doc, nil
 }
