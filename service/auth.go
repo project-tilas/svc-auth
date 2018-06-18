@@ -32,10 +32,6 @@ func NewRepositoryAuthService(
 }
 
 func (s repositoryAuthService) Register(_ context.Context, u domain.User) (*domain.User, *domain.Token, error) {
-	valErr := u.Validate()
-	if valErr != nil {
-		return nil, nil, valErr
-	}
 	u.EncryptPassword()
 	user, err := s.userRepo.Insert(u)
 	if err != nil {
@@ -50,7 +46,7 @@ func (s repositoryAuthService) Register(_ context.Context, u domain.User) (*doma
 	if tokenErr != nil {
 		return nil, nil, tokenErr
 	}
-	return &user, &token, nil
+	return user, token, nil
 }
 
 func (s repositoryAuthService) Login(_ context.Context, username, password string) (*domain.User, *domain.Token, error) {
@@ -62,7 +58,7 @@ func (s repositoryAuthService) Login(_ context.Context, username, password strin
 
 	passErr := user.ComparePassword(password)
 	if passErr != nil {
-		return nil, nil, domain.ErrInvalidPassword
+		return nil, nil, &domain.ValidationError{Reason: "Invalid Password"}
 	}
 	user.ClearPassword()
 
@@ -75,7 +71,7 @@ func (s repositoryAuthService) Login(_ context.Context, username, password strin
 		return nil, nil, tokenErr
 	}
 
-	return &user, &token, nil
+	return user, token, nil
 }
 
 func (s repositoryAuthService) LoginWithToken(_ context.Context, userID, token string) (*domain.User, *domain.Token, error) {
@@ -101,7 +97,7 @@ func (s repositoryAuthService) LoginWithToken(_ context.Context, userID, token s
 	}
 
 	deleteErr := s.tokenRepo.Remove(token)
-	return &user, &insert, deleteErr
+	return user, insert, deleteErr
 }
 
 func randToken() string {

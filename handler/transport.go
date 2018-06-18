@@ -60,10 +60,10 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 }
 
 func codeFrom(err error) int {
-	switch err {
-	case domain.ErrUserNotFound:
+	switch err.(type) {
+	case *domain.NotFoundError:
 		return http.StatusNotFound
-	case domain.ErrUserAlreadyExists:
+	case *domain.AlreadyExistsError:
 		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError
