@@ -14,7 +14,7 @@ test:
 	go test ./...
 
 build: install
-	go build -ldflags "-X main.version=$(TAG)" -o svc-auth .
+	go build -ldflags "-X main.version=$(TAG)" -o svc-auth ./cmd
 
 
 clean:
