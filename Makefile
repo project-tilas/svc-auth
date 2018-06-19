@@ -3,8 +3,13 @@
 TAG?=$(shell git rev-list HEAD --max-count=1 --abbrev-commit)
 
 export TAG
--include .env
-export $(shell sed 's/=.*//' .env)
+
+-include .svc-auth-config.env
+export $(shell sed 's/=.*//' .svc-auth-config.env)
+
+-include .svc-auth-secrets.env
+export $(shell sed 's/=.*//' .svc-auth-secrets.env)
+
 
 
 install:
