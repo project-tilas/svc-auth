@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -44,6 +45,24 @@ func init() {
 	dbAddr = getEnvVar("SVC_AUTH_DB_ADDR", "")
 	nodeName = getEnvVar("SVC_AUTH_NODE_NAME", "N/A")
 	podName = getEnvVar("SVC_AUTH_POD_NAME", "N/A")
+}
+
+func Health(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	b, err := json.Marshal(health{
+		Alive:       true,
+		NodeName:    nodeName,
+		PodName:     podName,
+		ServiceName: "svc-auth",
+		Version:     version,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
 }
 
 func main() {
@@ -91,8 +110,13 @@ func main() {
 	fmt.Println("Intitialising Auth Service")
 	authSvc := service.NewRepositoryAuthService(userRepo, tokenRepo)
 
-	fmt.Println("Intialising Routes")
+	fmt.Println("Initialising Routes")
 	r := mux.NewRouter()
+
+	fmt.Println("Initialising Health Routes")
+	r.HandleFunc("/health", Health).Methods("GET")
+
+	fmt.Println("Intialising Api Routes")
 	apiRouter := r.PathPrefix("/api").Subrouter()
 	handler.MakeServerHandler(authSvc, apiRouter)
 	printRoutes(r)
